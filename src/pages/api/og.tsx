@@ -1,7 +1,10 @@
 import { ImageResponse } from '@vercel/og';
 import clsx from 'clsx';
-import { random } from 'lodash-es';
+
 import { NextApiHandler } from 'next';
+
+const random = (min: number, max: number) =>
+    Math.floor(Math.random() * (max - min + 1) + min);
 
 type FakeIntl = {
     supportedValuesOf: (t: string) => string[];
@@ -48,3 +51,7 @@ const handler: NextApiHandler = () => {
 };
 
 export default handler;
+
+export const config = {
+    runtime: 'experimental-edge',
+};
