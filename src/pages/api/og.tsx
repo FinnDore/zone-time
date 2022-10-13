@@ -48,7 +48,3 @@ const handler: NextApiHandler = () => {
 };
 
 export default handler;
-
-export const config = {
-    runtime: 'experimental-edge',
-};
