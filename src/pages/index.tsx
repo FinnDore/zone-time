@@ -4,6 +4,7 @@ import intlFormat from 'date-fns/intlFormat';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { forwardRef, HTMLProps, useEffect, useState } from 'react';
+import { TimeScroller } from '../components/time-scroller';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -74,12 +75,14 @@ const Home: NextPage = () => {
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
                     <div className="mx-auto my-6 text-xl">
-                        <Time date={currentTime} />
+                        <TimeScroller currentHour={currentTime.getHours()} />
+                        {/* <Time date={currentTime} /> */}
                     </div>
                     <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
-                    <div className="mx-auto my-6 text-xl flex">
-                        <Time date={timeInLa} />
-                        <div className="ml-2">PST</div>
+                    <div className="mx-auto my-6 text-xl">
+                        {/* <Time date={timeInLa} /> */}
+                        <TimeScroller currentHour={timeInLa.getHours()} />
+                        {/* <div className="ml-2">PST</div> */}
                     </div>
                     <TimeAwareBg
                         date={currentTime}
