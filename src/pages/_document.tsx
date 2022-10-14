@@ -12,6 +12,7 @@ export default function document() {
                     content="https://time.finndore.dev/api/og"
                 />
                 <meta name="theme-color" content="#000" />
+                <meta name="twitter:card" content="summary_large_image"></meta>
             </Head>
             <body className=" bg-[#1e2022] text-white ">
                 <Main />
