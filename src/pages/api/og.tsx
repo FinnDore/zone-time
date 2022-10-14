@@ -1,5 +1,4 @@
 import { ImageResponse } from '@vercel/og';
-import clsx from 'clsx';
 
 import { NextApiHandler } from 'next';
 
@@ -12,9 +11,13 @@ type FakeIntl = {
 function getRandom<T>(list: T[]): T {
     return list[random(0, list.length - 1)] as T;
 }
+const font = fetch(new URL('./IBMPlexMono-Regular.ttf', import.meta.url)).then(
+    (res) => res.arrayBuffer()
+);
 
 const zones = (Intl as unknown as FakeIntl).supportedValuesOf('timeZone');
-const handler: NextApiHandler = () => {
+const handler: NextApiHandler = async () => {
+    const fontData = await font;
     const date = new Date();
     const timeFormat = date.toLocaleTimeString('utc', {
         hour: 'numeric',
@@ -32,21 +35,26 @@ const handler: NextApiHandler = () => {
                     height: '100%',
                     width: '100%',
                     display: 'flex',
-                    background: '#000',
+                    fontFamily: 'ibm-flex-mono',
+                    background: '#1e2022',
                 }}
             >
-                <div tw="w-[100%] h-[100%] flex text-center">
-                    <div
-                        tw={clsx('m-auto items-center  text-4xl', {
-                            'text-orange-800': isMorning,
-                            'text-blue-800': !isMorning,
-                        })}
-                    >
+                <div tw="shadow-inner m-auto w-[80%] h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
+                    <div tw="m-auto items-center  text-4xl text-white text-center">
                         {timeFormat}
                     </div>
                 </div>
             </div>
-        )
+        ),
+        {
+            fonts: [
+                {
+                    name: 'imb-plex-mono',
+                    data: fontData,
+                    style: 'normal',
+                },
+            ],
+        }
     );
 };
 
