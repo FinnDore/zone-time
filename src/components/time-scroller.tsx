@@ -45,7 +45,6 @@ const Time: FC<{
         config: config.default,
         position: [(index - centerIndex) * fontWidth, 0, 0],
     });
-    // font={'IBMPlexMono/IBMPlexMono-Regular.ttf'}
 
     return (
         <animated.mesh position={position as unknown as Vector3}>
@@ -54,6 +53,7 @@ const Time: FC<{
                 onClick={() => onHourChange && onHourChange(hour)}
                 fillOpacity={isCurrentHour ? 1 : 0.4}
                 fontSize={isCurrentHour ? 9 : 7}
+                font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
             >
                 {intlFormat(time, intlFormatToUse)}
             </Text>
