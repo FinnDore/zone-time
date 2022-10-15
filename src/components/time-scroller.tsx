@@ -1,4 +1,4 @@
-import { animated, useSpring } from '@react-spring/three';
+import { animated, config, useSpring } from '@react-spring/three';
 import { Text } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
@@ -41,6 +41,7 @@ const Time: FC<{
     const hour = time.getHours();
     const isCurrentHour = hour === currentHour;
     const { position } = useSpring({
+        config: config.default,
         position: [(index - centerIndex) * fontWidth, 0, 0],
     });
 
