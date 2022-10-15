@@ -11,9 +11,9 @@ type FakeIntl = {
 function getRandom<T>(list: T[]): T {
     return list[random(0, list.length - 1)] as T;
 }
-const font = fetch(new URL('./IBMPlexMono-Regular.ttf', import.meta.url)).then(
-    (res) => res.arrayBuffer()
-);
+const font = fetch(
+    new URL('../../../public/IBMPlexMono-Regular.ttf', import.meta.url)
+).then((res) => res.arrayBuffer());
 
 const zones = (Intl as unknown as FakeIntl).supportedValuesOf('timeZone');
 const handler: NextApiHandler = async () => {
