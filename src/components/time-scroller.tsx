@@ -1,7 +1,7 @@
-import { animated, config, useSpring } from '@react-spring/web';
+import { animated, useSpring } from '@react-spring/web';
 import clsx from 'clsx';
 import { intlFormat, setHours } from 'date-fns';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -29,37 +29,59 @@ const useTimes = () => {
     return times;
 };
 
-export const TimeScroller: FC<{ currentHour: number }> = ({ currentHour }) => {
+const Time: FC<{
+    time: Date;
+    currentHour: number;
+    onHourChange: ((hour: number) => unknown) | undefined;
+}> = ({ time, currentHour, onHourChange }) =>
+    useMemo(() => {
+        const hour = time.getHours();
+        const isCurrentHour = hour === currentHour;
+        return (
+            <span
+                className={clsx(
+                    'px-4 flex w-[calc(5ch + 2rem)] transition-all cursor-pointer select-none',
+                    {
+                        'opacity-40': !isCurrentHour,
+                    }
+                )}
+                onClick={() => onHourChange && onHourChange(hour)}
+                key={hour}
+            >
+                <span
+                    className={clsx('m-auto', {
+                        'text-sm': !isCurrentHour,
+                    })}
+                >
+                    {intlFormat(time, intlFormatToUse)}
+                </span>
+            </span>
+        );
+    }, [currentHour, onHourChange, time]);
+
+export const TimeScroller: FC<{
+    inputCurrentHour: number;
+    onHourChange?: (hour: number) => unknown;
+}> = ({ inputCurrentHour, onHourChange }) => {
     const times = useTimes();
-    console.log(times);
+
     const springStyles = useSpring({
-        config: config.default,
-        transform: `translateX(calc(-${(currentHour / 24) * 100}% + -1.5ch))`,
+        transform: `translateX(calc(-${
+            (inputCurrentHour / 24) * 100
+        }% + -1.5ch))`,
     });
 
     return (
         <div className="relative w-[5ch] h-4 mx-4">
-            <animated.div style={springStyles} className="absolute top-0 flex ">
-                {times.map((x) => {
-                    const hour = x.getHours();
-                    const isCurrentHour = hour === currentHour;
-                    return (
-                        <span
-                            className={clsx('mx-4 flex w-[5ch]', {
-                                'opacity-40': !isCurrentHour,
-                            })}
-                            key={hour}
-                        >
-                            <span
-                                className={clsx('m-auto', {
-                                    'text-sm': !isCurrentHour,
-                                })}
-                            >
-                                {intlFormat(x, intlFormatToUse)}{' '}
-                            </span>
-                        </span>
-                    );
-                })}
+            <animated.div style={springStyles} className="absolute top-0 flex">
+                {times.map((x) => (
+                    <Time
+                        key={x.getHours()}
+                        time={x}
+                        currentHour={inputCurrentHour}
+                        onHourChange={onHourChange}
+                    />
+                ))}
             </animated.div>
         </div>
     );
