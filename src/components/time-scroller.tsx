@@ -52,7 +52,7 @@ const Time: FC<{
                 color={'#fff'}
                 onClick={() => onHourChange && onHourChange(hour)}
                 fillOpacity={isCurrentHour ? 1 : 0.4}
-                font="/IBMPlexMono/IBMPlexMono-Regular.ttf"
+                font={window.origin + '/IBMPlexMono/IBMPlexMono-Regular.ttf'}
                 fontSize={isCurrentHour ? 9 : 7}
             >
                 {intlFormat(time, intlFormatToUse)}
