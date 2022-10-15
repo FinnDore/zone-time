@@ -2,7 +2,8 @@ import { animated, config, useSpring } from '@react-spring/three';
 import { Text } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { Vector3 } from 'three';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -45,9 +46,8 @@ const Time: FC<{
         position: [(index - centerIndex) * fontWidth, 0, 0],
     });
 
-    const myMesh = useRef();
     return (
-        <animated.mesh position={position} ref={myMesh}>
+        <animated.mesh position={position as unknown as Vector3}>
             <Text
                 color={'#fff'}
                 onClick={() => onHourChange && onHourChange(hour)}
