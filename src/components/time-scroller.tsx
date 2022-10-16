@@ -1,9 +1,8 @@
 import { animated, config, useSpring } from '@react-spring/three';
-import { Text } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Text, useCursor } from '@react-three/drei';
+import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
 import { FC, useEffect, useState } from 'react';
-import { Vector3 } from 'three';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -33,24 +32,26 @@ const useTimes = () => {
 
 const fontWidth = 35;
 const Time: FC<{
-    centerIndex: number;
     time: Date;
     currentHour: number;
     onHourChange: ((hour: number) => unknown) | undefined;
     index: number;
-}> = ({ time, currentHour, onHourChange, centerIndex, index }) => {
+}> = ({ time, currentHour, onHourChange, index }) => {
+    const [hovered, setHovered] = useState(false);
+
     const hour = time.getHours();
     const isCurrentHour = hour === currentHour;
-    const { position } = useSpring({
-        config: config.default,
-        position: [(index - centerIndex) * fontWidth, 0, 0],
-    });
 
+    useCursor(hovered);
     return (
-        <animated.mesh position={position as unknown as Vector3}>
+        <animated.mesh
+            position={[index * fontWidth, 0, 0]}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+            onClick={() => onHourChange && onHourChange(hour + 1)}
+        >
             <Text
                 color={'#fff'}
-                onClick={() => onHourChange && onHourChange(hour)}
                 fillOpacity={isCurrentHour ? 1 : 0.4}
                 fontSize={isCurrentHour ? 9 : 7}
                 font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
@@ -69,38 +70,29 @@ export const TimeScroller: FC<{
     const center = times.findIndex(
         (time) => time.getHours() === inputCurrentHour
     );
+    const { position } = useSpring({
+        config: config.default,
+        position: [-(center * fontWidth), 0, 0],
+    });
+
     return (
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">
-                {times.map((x, i) => (
-                    <Time
-                        centerIndex={center}
-                        index={i}
-                        currentHour={inputCurrentHour}
-                        time={x}
-                        onHourChange={onHourChange}
-                        key={x.getHours()}
-                    />
-                ))}
+                <animated.mesh position={position as unknown as Vector3}>
+                    {times.map((x, i) => (
+                        <Time
+                            centerIndex={center}
+                            index={i}
+                            currentHour={inputCurrentHour}
+                            time={x}
+                            onHourChange={onHourChange}
+                            key={x.getHours()}
+                        />
+                    ))}
+                </animated.mesh>
             </Canvas>
         </div>
     );
 };
-
-{
-    /* <animated.div
-                    style={springStyles}
-                    className="absolute top-0 flex"
-                >
-                    {times.map((x) => (
-                        <Time
-                            key={x.getHours()}
-                            time={x}
-                            currentHour={inputCurrentHour}
-                            onHourChange={onHourChange}
-                        />
-                    ))}
-                </animated.div> */
-}
 
 export default TimeScroller;
