@@ -1,7 +1,8 @@
-import { animated, useSpring } from '@react-spring/web';
-import clsx from 'clsx';
+import { animated, config, useSpring } from '@react-spring/three';
+import { Text, useCursor } from '@react-three/drei';
+import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -29,60 +30,68 @@ const useTimes = () => {
     return times;
 };
 
+const fontWidth = 35;
 const Time: FC<{
     time: Date;
     currentHour: number;
     onHourChange: ((hour: number) => unknown) | undefined;
-}> = ({ time, currentHour, onHourChange }) =>
-    useMemo(() => {
-        const hour = time.getHours();
-        const isCurrentHour = hour === currentHour;
-        return (
-            <span
-                className={clsx(
-                    'px-4 flex w-[calc(5ch + 2rem)] transition-all cursor-pointer select-none',
-                    {
-                        'opacity-40': !isCurrentHour,
-                    }
-                )}
-                onClick={() => onHourChange && onHourChange(hour)}
-                key={hour}
+    index: number;
+}> = ({ time, currentHour, onHourChange, index }) => {
+    const [hovered, setHovered] = useState(false);
+
+    const hour = time.getHours();
+    const isCurrentHour = hour === currentHour;
+
+    useCursor(hovered);
+    return (
+        <animated.mesh
+            position={[index * fontWidth, 0, 0]}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+            onClick={() => onHourChange && onHourChange(hour + 1)}
+        >
+            <Text
+                color={'#fff'}
+                fillOpacity={isCurrentHour ? 1 : 0.4}
+                fontSize={isCurrentHour ? 9 : 7}
+                font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
             >
-                <span
-                    className={clsx('m-auto', {
-                        'text-sm': !isCurrentHour,
-                    })}
-                >
-                    {intlFormat(time, intlFormatToUse)}
-                </span>
-            </span>
-        );
-    }, [currentHour, onHourChange, time]);
+                {intlFormat(time, intlFormatToUse)}
+            </Text>
+        </animated.mesh>
+    );
+};
 
 export const TimeScroller: FC<{
     inputCurrentHour: number;
     onHourChange?: (hour: number) => unknown;
 }> = ({ inputCurrentHour, onHourChange }) => {
     const times = useTimes();
-
-    const springStyles = useSpring({
-        transform: `translateX(calc(-${
-            (inputCurrentHour / 24) * 100
-        }% + -1.5ch))`,
+    const center = times.findIndex(
+        (time) => time.getHours() === inputCurrentHour
+    );
+    const { position } = useSpring({
+        config: config.default,
+        position: [-(center * fontWidth), 0, 0],
     });
 
     return (
-        <div className="relative w-[5ch] h-4 mx-4">
-            <animated.div style={springStyles} className="absolute top-0 flex">
-                {times.map((x) => (
-                    <Time
-                        key={x.getHours()}
-                        time={x}
-                        currentHour={inputCurrentHour}
-                        onHourChange={onHourChange}
-                    />
-                ))}
-            </animated.div>
+        <div className="w-full h-4">
+            <Canvas className="w-full h-4 absolute">
+                <animated.mesh position={position as unknown as Vector3}>
+                    {times.map((x, i) => (
+                        <Time
+                            index={i}
+                            currentHour={inputCurrentHour}
+                            time={x}
+                            onHourChange={onHourChange}
+                            key={x.getHours()}
+                        />
+                    ))}
+                </animated.mesh>
+            </Canvas>
         </div>
     );
 };
+
+export default TimeScroller;

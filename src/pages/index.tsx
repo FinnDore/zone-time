@@ -4,9 +4,13 @@ import { zonedTimeToUtc } from 'date-fns-tz';
 import utcToZonedTime from 'date-fns-tz/utcToZonedTime';
 import intlFormat from 'date-fns/intlFormat';
 import type { NextPage } from 'next';
-import Head from 'next/head';
-import { forwardRef, HTMLProps, useEffect, useState } from 'react';
-import { TimeScroller } from '../components/time-scroller';
+import React, {
+    forwardRef,
+    HTMLProps,
+    Suspense,
+    useEffect,
+    useState,
+} from 'react';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -87,7 +91,7 @@ const TimeAwareBg = forwardRef<
         </div>
     );
 });
-
+const TimeScroller = React.lazy(() => import('../components/time-scroller'));
 const Home: NextPage = () => {
     const currentTime = useCurrentTime();
     const [timeOverride, setTimeOverride] = useState<Date | null>(null);
@@ -97,41 +101,45 @@ const Home: NextPage = () => {
         <>
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
-                    <div className="mx-auto my-6 text-xl">
-                        <TimeScroller
-                            inputCurrentHour={
-                                timeOverride?.getHours() ??
-                                currentTime?.getHours() ??
-                                12
-                            }
-                            onHourChange={(hour) =>
-                                currentTime &&
-                                setTimeOverride(() =>
-                                    setHours(currentTime, hour)
-                                )
-                            }
-                        />
+                    <div className="my-6 text-xl">
+                        <Suspense fallback={'loading'}>
+                            <TimeScroller
+                                inputCurrentHour={
+                                    timeOverride?.getHours() ??
+                                    currentTime?.getHours() ??
+                                    12
+                                }
+                                onHourChange={(hour) =>
+                                    currentTime &&
+                                    setTimeOverride(() =>
+                                        setHours(currentTime, hour)
+                                    )
+                                }
+                            />
+                        </Suspense>
                         {/* <Time date={currentTime} /> */}
                     </div>
                     <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
-                    <div className="mx-auto my-6 text-xl">
+                    <div className=" my-6 text-xl">
                         {/* <Time date={timeInLa} /> */}
-                        <TimeScroller
-                            inputCurrentHour={timeInLa?.getHours() ?? 12}
-                            onHourChange={(hour) =>
-                                timeInLa &&
-                                currentTime &&
-                                setTimeOverride(() =>
-                                    utcToZonedTime(
-                                        zonedTimeToUtc(
-                                            setHours(timeInLa, hour),
-                                            'America/New_York'
-                                        ),
-                                        'gmt'
+                        <Suspense fallback={'loading'}>
+                            <TimeScroller
+                                inputCurrentHour={timeInLa?.getHours() ?? 12}
+                                onHourChange={(hour) =>
+                                    timeInLa &&
+                                    currentTime &&
+                                    setTimeOverride(() =>
+                                        utcToZonedTime(
+                                            zonedTimeToUtc(
+                                                setHours(timeInLa, hour),
+                                                'America/New_York'
+                                            ),
+                                            'gmt'
+                                        )
                                     )
-                                )
-                            }
-                        />
+                                }
+                            />
+                        </Suspense>
                         {/* <div className="ml-2">PST</div> */}
                     </div>
                     {timeInLa && currentTime && (
