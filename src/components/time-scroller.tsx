@@ -40,6 +40,7 @@ const Time: FC<{
     const [hovered, setHovered] = useState(false);
 
     const hour = time.getHours();
+    const utcHours = time.getUTCHours();
     const isCurrentHour = hour === currentHour;
 
     useCursor(hovered);
@@ -48,7 +49,7 @@ const Time: FC<{
             position={[index * fontWidth, 0, 0]}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
-            onClick={() => onHourChange && onHourChange(hour + 1)}
+            onClick={() => onHourChange && onHourChange(utcHours)}
         >
             <Text
                 color={'#fff'}
@@ -93,5 +94,3 @@ export const TimeScroller: FC<{
         </div>
     );
 };
-
-export default TimeScroller;
