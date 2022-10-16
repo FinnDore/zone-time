@@ -81,7 +81,6 @@ export const TimeScroller: FC<{
                 <animated.mesh position={position as unknown as Vector3}>
                     {times.map((x, i) => (
                         <Time
-                            centerIndex={center}
                             index={i}
                             currentHour={inputCurrentHour}
                             time={x}
