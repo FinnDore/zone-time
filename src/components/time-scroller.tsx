@@ -1,8 +1,12 @@
 import { animated, config, useSpring } from '@react-spring/three';
 import { Text, useCursor } from '@react-three/drei';
-import { Canvas, Vector3 } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
+import { useDrag } from '@use-gesture/react';
 import { intlFormat, setHours } from 'date-fns';
-import { FC, useEffect, useState } from 'react';
+import { clamp } from 'lodash-es';
+import {} from 'process';
+import { FC, useEffect, useRef, useState } from 'react';
+import { Vector3 } from 'three';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -42,13 +46,13 @@ const Time: FC<{
     const hour = time.getHours();
     const isCurrentHour = hour === currentHour;
 
+    // onClick={() => onHourChange && onHourChange(hour + 1)}
     useCursor(hovered);
     return (
         <animated.mesh
             position={[index * fontWidth, 0, 0]}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
-            onClick={() => onHourChange && onHourChange(hour + 1)}
         >
             <Text
                 color={'#fff'}
@@ -62,6 +66,34 @@ const Time: FC<{
     );
 };
 
+const useDragThing = (index: number) => {
+    const dragObjectRef = useRef<typeof animated.mesh>();
+
+    const [{ position }, api] = useSpring(() => ({
+        position: [-(index * fontWidth), 0, 0] as const,
+        config: { ...config.gentle, friction: 5, bounce: 0 },
+    }));
+
+    const bind = useDrag(
+        ({ active, movement: [x, y], timeStamp, event }) => {
+            console.log(x, y);
+
+            const newX = clamp(
+                x < 0 ? position.get()[0] - 15 : position.get()[0] + 15,
+                -(fontWidth * 23),
+                0
+            );
+            api.start({
+                // position: active ? [x / aspect, -y / aspect, 0] : [0, 0, 0],
+                position: [newX, 0, 0],
+            });
+            return timeStamp;
+        },
+        { delay: true, axis: 'x' }
+    );
+    return { dragObjectRef, bind, position };
+};
+
 export const TimeScroller: FC<{
     inputCurrentHour: number;
     onHourChange?: (hour: number) => unknown;
@@ -70,28 +102,38 @@ export const TimeScroller: FC<{
     const center = times.findIndex(
         (time) => time.getHours() === inputCurrentHour
     );
-    const { position } = useSpring({
-        config: config.default,
-        position: [-(center * fontWidth), 0, 0],
-    });
+
+    const { position, bind, dragObjectRef } = useDragThing(center);
 
     return (
-        <div className="w-full h-4">
-            <Canvas className="w-full h-4 absolute">
-                <animated.mesh position={position as unknown as Vector3}>
-                    {times.map((x, i) => (
-                        <Time
-                            index={i}
-                            currentHour={inputCurrentHour}
-                            time={x}
-                            onHourChange={onHourChange}
-                            key={x.getHours()}
-                        />
-                    ))}
-                </animated.mesh>
-            </Canvas>
-        </div>
+        <animated.mesh
+            position={position as unknown as Vector3}
+            ref={dragObjectRef}
+            {...bind()}
+        >
+            {times.map((x, i) => (
+                <Time
+                    index={i}
+                    currentHour={inputCurrentHour}
+                    time={x}
+                    onHourChange={onHourChange}
+                    key={x.getHours()}
+                />
+            ))}
+        </animated.mesh>
     );
 };
 
-export default TimeScroller;
+const A = (props: any) => (
+    <div className="w-full h-4">
+        <Canvas className="w-full h-4 absolute">
+            <TimeScroller {...props} />
+        </Canvas>
+    </div>
+);
+export default A;
+
+// const { position } = useSpring({
+//     config: config.default,
+//     position: [-(center * fontWidth), 0, 0],
+// });
