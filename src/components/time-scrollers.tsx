@@ -10,15 +10,29 @@ const intlFormatToUse = {
 
 const useCurrentTime = () => {
     const [currentTime, setCurrentTime] = useState<Date | null>();
+    const interval = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
         setCurrentTime(new Date());
-        const timer = setInterval(() => {
+        interval.current = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
-        return () => clearInterval(timer);
-    }, []);
+        return () => {
+            interval.current && clearInterval(interval.current);
+        };
+    }, [setCurrentTime]);
     return currentTime;
 };
+// const useCurrentTime = () => {
+//     const currentTime = useRef<Date | null>();
+//     useEffect(() => {
+//         currentTime.current = new Date();
+//         const timer = setInterval(() => {
+//             currentTime.current = new Date();
+//         }, 1000);
+//         return () => clearInterval(timer);
+//     }, []);
+//     return currentTime.current;
+// };
 
 const useTimeInZone = (time: Date | null) => {
     const [timeInZone, setTimeInZone] = useState(time);
@@ -34,7 +48,7 @@ const useTimeInZone = (time: Date | null) => {
 
 const useRelativeTimes = (timeZones: string[]) => {
     const [masterTime, setMasterTime] = useState<Date | null>(null);
-    const relativeTimes = useRef<Date[]>([]);
+    const relativeTimes = useRef<[[Date, string]] | null>(null);
     const currentTime = useCurrentTime();
 
     useEffect(() => {
@@ -44,17 +58,18 @@ const useRelativeTimes = (timeZones: string[]) => {
         if (!currentTime) {
             return reset;
         }
+
         const zonedTime = zonedTimeToUtc(masterTime ?? currentTime, 'UTC');
 
-        const times = [zonedTime];
+        const times: [[Date, string]] = [[zonedTime, 'utc']];
         for (const timeZone of timeZones) {
             const time = utcToZonedTime(zonedTime, timeZone);
-            times.push(time);
+            times.push([time, timeZone]);
         }
         relativeTimes.current = times;
         console.log('re-renderTimes');
         return reset;
-    }, [currentTime?.toUTCString(), masterTime, timeZones]);
+    }, [currentTime, masterTime, timeZones]);
 
     return {
         relativeTimes: relativeTimes.current,
@@ -67,17 +82,24 @@ export const TimeScrollers: React.FC<{
 }> = ({ setFirstAndLast }) => {
     const { relativeTimes, setMasterTime } = useRelativeTimes([
         'America/New_York',
-        'America/Argentina/San_Juan',
+        'Pacific/Wallis',
+        'Indian/Reunion',
     ]);
 
     useEffect(() => {
-        const first = relativeTimes[0];
-        const last = relativeTimes[relativeTimes.length - 1];
+        if (!relativeTimes) {
+            return;
+        }
+        const first = relativeTimes[0]?.[0];
+        const last = relativeTimes[relativeTimes.length - 1]?.[0];
         if (first && last) {
             setFirstAndLast({ first, last });
         }
     }, [relativeTimes, setFirstAndLast]);
 
+    if (!relativeTimes) {
+        return null;
+    }
     return (
         <>
             {relativeTimes.map((time, index) => (
@@ -85,9 +107,9 @@ export const TimeScrollers: React.FC<{
                     <div className="my-6">
                         <TimeScroller
                             key={index}
-                            inputCurrentHour={time.getHours()}
+                            inputCurrentHour={time[0].getHours()}
                             onHourChange={(hour) =>
-                                setMasterTime(() => setHours(time, hour))
+                                setMasterTime(() => setHours(time[0], hour))
                             }
                         />
                     </div>
