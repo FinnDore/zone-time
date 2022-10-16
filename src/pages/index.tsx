@@ -12,7 +12,8 @@ const TimeAwareBg = forwardRef<
     }
 >(function TimeAwareBgInner(props, forwardedRef) {
     const isMorning = props.date.getHours() < 12;
-
+    console.log('isMorning', isMorning);
+    console.log('props.date.getHours()', props.date.getHours());
     return (
         <div
             {...props}
@@ -59,7 +60,7 @@ const TimeScrollerFallback = () => (
 
 const TimeAwareBgs = () => {
     const firstAndLast = useAtomValue(firstAndLastAtom);
-    console.log('firstAndLast', firstAndLast);
+
     if (!firstAndLast) {
         return null;
     }

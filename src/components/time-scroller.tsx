@@ -2,6 +2,7 @@ import { animated, config, useSpring } from '@react-spring/three';
 import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { FC, useEffect, useState } from 'react';
 
 const intlFormatToUse = {
@@ -9,7 +10,7 @@ const intlFormatToUse = {
     minute: 'numeric',
 } as const;
 
-const useTimes = () => {
+const useTimes = (timeZone: string) => {
     const [times, setTimes] = useState<Date[]>([]);
 
     useEffect(() => {
@@ -25,7 +26,7 @@ const useTimes = () => {
         setTimes(() => newTimes);
 
         return () => setTimes(() => []);
-    }, []);
+    }, [timeZone]);
 
     return times;
 };
@@ -33,14 +34,14 @@ const useTimes = () => {
 const fontWidth = 35;
 const Time: FC<{
     time: Date;
+    timeZone: string;
     currentHour: number;
-    onHourChange: ((hour: number) => unknown) | undefined;
+    onHourChange: ((hours: number) => unknown) | undefined;
     index: number;
-}> = ({ time, currentHour, onHourChange, index }) => {
+}> = ({ time, currentHour, onHourChange, index, timeZone }) => {
     const [hovered, setHovered] = useState(false);
 
     const hour = time.getHours();
-    const utcHours = time.getUTCHours();
     const isCurrentHour = hour === currentHour;
 
     useCursor(hovered);
@@ -49,7 +50,15 @@ const Time: FC<{
             position={[index * fontWidth, 0, 0]}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
-            onClick={() => onHourChange && onHourChange(utcHours)}
+            onClick={() =>
+                onHourChange &&
+                onHourChange(
+                    zonedTimeToUtc(
+                        setHours(utcToZonedTime(new Date(), timeZone), hour),
+                        timeZone
+                    ).getHours()
+                )
+            }
         >
             <Text
                 color={'#fff'}
@@ -65,9 +74,10 @@ const Time: FC<{
 
 export const TimeScroller: FC<{
     inputCurrentHour: number;
+    timeZone: string;
     onHourChange?: (hour: number) => unknown;
-}> = ({ inputCurrentHour, onHourChange }) => {
-    const times = useTimes();
+}> = ({ inputCurrentHour, onHourChange, timeZone }) => {
+    const times = useTimes(timeZone);
     const center = times.findIndex(
         (time) => time.getHours() === inputCurrentHour
     );
@@ -83,6 +93,7 @@ export const TimeScroller: FC<{
                     {times.map((x, i) => (
                         <Time
                             index={i}
+                            timeZone={timeZone}
                             currentHour={inputCurrentHour}
                             time={x}
                             onHourChange={onHourChange}
