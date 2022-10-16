@@ -1,6 +1,8 @@
 import clsx from 'clsx';
+import { useAtomValue } from 'jotai';
 import type { NextPage } from 'next';
-import { forwardRef, HTMLProps, lazy, Suspense, useState } from 'react';
+import { forwardRef, HTMLProps, lazy, Suspense } from 'react';
+import { firstAndLastAtom } from '../attoms/first-and-last';
 import { Skeleton } from '../components/skeleton';
 
 const TimeAwareBg = forwardRef<
@@ -55,35 +57,36 @@ const TimeScrollerFallback = () => (
     </div>
 );
 
+const TimeAwareBgs = () => {
+    const firstAndLast = useAtomValue(firstAndLastAtom);
+    console.log('firstAndLast', firstAndLast);
+    if (!firstAndLast) {
+        return null;
+    }
+    return (
+        <>
+            <TimeAwareBg
+                date={firstAndLast.first}
+                className="absolute -top-[25%] h-1/3 w-full blur-2xl"
+            />
+            <TimeAwareBg
+                date={firstAndLast.last}
+                className="absolute bottom-[-25%] h-1/3 w-full blur-2xl"
+            />
+        </>
+    );
+};
+
 const Home: NextPage = () => {
-    const [firstAndLast, setFirstAndLast] = useState<{
-        first: Date;
-        last: Date;
-    } | null>();
     return (
         <>
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
                     <Suspense fallback={<TimeScrollerFallback />}>
-                        <TimeScrollers
-                            setFirstAndLast={(dates) =>
-                                setFirstAndLast(() => dates)
-                            }
-                        />
+                        <TimeScrollers />
                     </Suspense>
 
-                    {firstAndLast && (
-                        <>
-                            <TimeAwareBg
-                                date={firstAndLast.first}
-                                className="absolute -top-[25%] h-1/3 w-full blur-2xl"
-                            />
-                            <TimeAwareBg
-                                date={firstAndLast.last}
-                                className="absolute bottom-[-25%] h-1/3 w-full blur-2xl"
-                            />
-                        </>
-                    )}
+                    <TimeAwareBgs />
                 </div>
             </div>
         </>

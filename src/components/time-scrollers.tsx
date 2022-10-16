@@ -1,6 +1,7 @@
-import { setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
+import { useSetAtom } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
+import { firstAndLastAtom } from '../attoms/first-and-last';
 import { TimeScroller } from './time-scroller';
 
 const intlFormatToUse = {
@@ -9,17 +10,18 @@ const intlFormatToUse = {
 } as const;
 
 const useCurrentTime = () => {
-    const [currentTime, setCurrentTime] = useState<Date | null>();
+    const [currentTime, setCurrentTime] = useState<Date | null>(new Date());
     const interval = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
+        console.log('useCurrentTime');
         setCurrentTime(new Date());
         interval.current = setInterval(() => {
             setCurrentTime(new Date());
-        }, 1000);
+        }, 100000);
         return () => {
             interval.current && clearInterval(interval.current);
         };
-    }, [setCurrentTime]);
+    }, []);
     return currentTime;
 };
 // const useCurrentTime = () => {
@@ -34,26 +36,29 @@ const useCurrentTime = () => {
 //     return currentTime.current;
 // };
 
-const useTimeInZone = (time: Date | null) => {
-    const [timeInZone, setTimeInZone] = useState(time);
+// const useTimeInZone = (time: Date | null) => {
+//     const [timeInZone, setTimeInZone] = useState(time);
 
-    useEffect(() => {
-        if (time) {
-            setTimeInZone(utcToZonedTime(time, 'America/New_York'));
-        }
-    }, [time]);
+//     useEffect(() => {
+//         if (time) {
+//             setTimeInZone(utcToZonedTime(time, 'America/New_York'));
+//         }
+//     }, [time]);
 
-    return timeInZone;
-};
+//     return timeInZone;
+// };
 
 const useRelativeTimes = (timeZones: string[]) => {
     const [masterTime, setMasterTime] = useState<Date | null>(null);
     const relativeTimes = useRef<[[Date, string]] | null>(null);
+
     const currentTime = useCurrentTime();
+    const setFirstAndLast = useSetAtom(firstAndLastAtom);
 
     useEffect(() => {
         const reset = () => {
-            console.log('reset');
+            relativeTimes.current = null;
+            setMasterTime(null);
         };
         if (!currentTime) {
             return reset;
@@ -66,10 +71,18 @@ const useRelativeTimes = (timeZones: string[]) => {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
         }
+
+        const first = times[0][0];
+        const last = times[times.length - 1]?.[0];
+        if (first && last) {
+            console.log('first', first);
+            setFirstAndLast({ first, last });
+        }
+
         relativeTimes.current = times;
         console.log('re-renderTimes');
         return reset;
-    }, [currentTime, masterTime, timeZones]);
+    }, [currentTime, masterTime, setFirstAndLast, timeZones]);
 
     return {
         relativeTimes: relativeTimes.current,
@@ -77,25 +90,12 @@ const useRelativeTimes = (timeZones: string[]) => {
     };
 };
 
-export const TimeScrollers: React.FC<{
-    setFirstAndLast: (dates: { first: Date; last: Date }) => unknown;
-}> = ({ setFirstAndLast }) => {
+export const TimeScrollers = () => {
     const { relativeTimes, setMasterTime } = useRelativeTimes([
         'America/New_York',
         'Pacific/Wallis',
         'Indian/Reunion',
     ]);
-
-    useEffect(() => {
-        if (!relativeTimes) {
-            return;
-        }
-        const first = relativeTimes[0]?.[0];
-        const last = relativeTimes[relativeTimes.length - 1]?.[0];
-        if (first && last) {
-            setFirstAndLast({ first, last });
-        }
-    }, [relativeTimes, setFirstAndLast]);
 
     if (!relativeTimes) {
         return null;
@@ -106,11 +106,13 @@ export const TimeScrollers: React.FC<{
                 <>
                     <div className="my-6">
                         <TimeScroller
+                            onHourChange={(hour) => {
+                                const newTime = new Date(time[0]);
+                                newTime.setHours(hour);
+                                setMasterTime(newTime);
+                            }}
                             key={index}
                             inputCurrentHour={time[0].getHours()}
-                            onHourChange={(hour) =>
-                                setMasterTime(() => setHours(time[0], hour))
-                            }
                         />
                     </div>
                     {index !== relativeTimes.length - 1 && (
@@ -118,36 +120,6 @@ export const TimeScrollers: React.FC<{
                     )}
                 </>
             ))}
-            {/* <div className="my-6 text-xl">
-                <TimeScroller
-                    inputCurrentHour={relativeTimes[0].getHours()}
-                    onHourChange={(hour) =>
-                        currentTime &&
-                        setTimeOverride(() => setHours(currentTime, hour))
-                    }
-                />
-            </div>
-
-            <div className="my-6 text-xl">
-                <TimeScroller
-                    inputCurrentHour={timeInLa?.getHours() ?? 12}
-                    onHourChange={(hour) =>
-                        timeInLa &&
-                        currentTime &&
-                        setTimeOverride(() =>
-                            utcToZonedTime(
-                                zonedTimeToUtc(
-                                    setHours(timeInLa, hour),
-                                    'America/New_York'
-                                ),
-                                'gmt'
-                            )
-                        )
-                    }
-                /> 
-                
-            </div>
-                */}
         </>
     );
 };
