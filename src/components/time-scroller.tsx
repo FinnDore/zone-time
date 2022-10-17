@@ -88,6 +88,10 @@ export const TimeScroller: FC<{
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
     const times = useTimes();
     const [pos, setPos] = useState([12, 0, 0]);
+    const { position } = useSpring({
+        config: config.default,
+        position: [...pos],
+    });
 
     useEffect(() => {
         const center = times.findIndex(
@@ -97,11 +101,6 @@ export const TimeScroller: FC<{
             setPos(() => [-(center * fontWidth), 0, 0]);
         }
     }, [inputCurrentHour, times]);
-
-    const { position } = useSpring({
-        config: config.default,
-        position: [...pos],
-    });
 
     return (
         <div className="w-full h-4">
