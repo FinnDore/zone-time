@@ -93,7 +93,9 @@ export const TimeScroller: FC<{
         const center = times.findIndex(
             (time) => time.getHours() === inputCurrentHour
         );
-        setPos(() => [-(center * fontWidth), 0, 0]);
+        if (center !== -1) {
+            setPos(() => [-(center * fontWidth), 0, 0]);
+        }
     }, [inputCurrentHour, times]);
 
     const { position } = useSpring({
