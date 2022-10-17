@@ -3,15 +3,15 @@ import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 const intlFormatToUse = {
     hour: 'numeric',
     minute: 'numeric',
 } as const;
 
-const useTimes = (timeZone: string) => {
-    const [times, setTimes] = useState<Date[]>([]);
+const useTimes = () => {
+    const times = useRef<Date[]>([]);
 
     useEffect(() => {
         const newTimes: Date[] = [];
@@ -23,12 +23,14 @@ const useTimes = (timeZone: string) => {
             newTimes.push(setHours(time, i));
         }
 
-        setTimes(() => newTimes);
+        times.current = newTimes;
 
-        return () => setTimes(() => []);
-    }, [timeZone]);
+        return () => {
+            times.current = [];
+        };
+    }, []);
 
-    return times;
+    return times.current;
 };
 
 const fontWidth = 35;
@@ -44,21 +46,26 @@ const Time: FC<{
     const hour = time.getHours();
     const isCurrentHour = hour === currentHour;
 
+    const onHourChangeFn = useCallback(
+        () =>
+            onHourChange &&
+            currentHour !== hour &&
+            onHourChange(
+                zonedTimeToUtc(
+                    setHours(utcToZonedTime(new Date(), timeZone), hour),
+                    timeZone
+                ).getHours()
+            ),
+        [currentHour, hour, onHourChange, timeZone]
+    );
+
     useCursor(hovered);
     return (
         <animated.mesh
             position={[index * fontWidth, 0, 0]}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
-            onClick={() =>
-                onHourChange &&
-                onHourChange(
-                    zonedTimeToUtc(
-                        setHours(utcToZonedTime(new Date(), timeZone), hour),
-                        timeZone
-                    ).getHours()
-                )
-            }
+            onClick={onHourChangeFn}
         >
             <Text
                 color={'#fff'}
@@ -77,15 +84,25 @@ export const TimeScroller: FC<{
     timeZone: string;
     onHourChange?: (hour: number) => unknown;
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
-    const times = useTimes(timeZone);
-    const center = times.findIndex(
-        (time) => time.getHours() === inputCurrentHour
-    );
+    const times = useTimes();
+    const [center, setCenter] = useState<number>(12);
+
+    useEffect(() => {
+        setCenter(
+            times.findIndex((time) => time.getHours() === inputCurrentHour)
+        );
+        return () => {
+            setCenter(12);
+        };
+    }, [inputCurrentHour, times, setCenter]);
+
     const { position } = useSpring({
         config: config.default,
         position: [-(center * fontWidth), 0, 0],
     });
-
+    if (timeZone === 'gmt') {
+        console.log('center.current', center);
+    }
     return (
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">

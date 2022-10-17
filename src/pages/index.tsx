@@ -12,8 +12,7 @@ const TimeAwareBg = forwardRef<
     }
 >(function TimeAwareBgInner(props, forwardedRef) {
     const isMorning = props.date.getHours() < 12;
-    console.log('isMorning', isMorning);
-    console.log('props.date.getHours()', props.date.getHours());
+
     return (
         <div
             {...props}

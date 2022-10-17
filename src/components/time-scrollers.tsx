@@ -1,7 +1,7 @@
 import { setHours } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useSetAtom } from 'jotai';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
 import { TimeScroller } from './time-scroller';
 
@@ -35,8 +35,8 @@ const useRelativeTimes = (timeZones: string[]) => {
 
     useEffect(() => {
         const reset = () => {
-            relativeTimes.current = null;
-            setMasterTime(null);
+            // relativeTimes.current = null;
+            // setMasterTime(null);
         };
         if (!currentTime) {
             return reset;
@@ -44,7 +44,7 @@ const useRelativeTimes = (timeZones: string[]) => {
 
         const zonedTime = masterTime ?? currentTime;
 
-        const times: [[Date, string]] = [[zonedTime, 'utc']];
+        const times: [[Date, string]] = [[zonedTime, 'gmt']];
         for (const timeZone of timeZones) {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
@@ -74,20 +74,28 @@ const TimeScrollers = () => {
         'CET',
         'IST',
     ]);
+    const onHourChange = useCallback(
+        (hour: number) => {
+            if (relativeTimes?.[0]) {
+                const [masterTime] = relativeTimes[0];
+                setMasterTime(() => setHours(masterTime, hour));
+            }
+        },
+        [relativeTimes, setMasterTime]
+    );
 
     if (!relativeTimes) {
         return null;
     }
+
     return (
         <>
             {relativeTimes.map((time, index) => (
-                <div key={index}>
+                <div key={time[1]}>
                     <div className="my-6">
                         <TimeScroller
                             timeZone={time[1]}
-                            onHourChange={(hour) => {
-                                setMasterTime(() => setHours(new Date(), hour));
-                            }}
+                            onHourChange={onHourChange}
                             inputCurrentHour={time[0].getHours()}
                         />
                     </div>
