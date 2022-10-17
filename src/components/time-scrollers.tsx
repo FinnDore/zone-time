@@ -19,7 +19,7 @@ const useCurrentUtcTime = () => {
         setCurrentTime(getUtc());
         interval.current = setInterval(() => {
             setCurrentTime(getUtc());
-        }, 100000);
+        }, 0);
         return () => {
             interval.current && clearInterval(interval.current);
         };
