@@ -4,6 +4,7 @@ import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { getUtc } from '../_functions/get-utc';
 
 const intlFormatToUse = {
     hour: 'numeric',
@@ -17,6 +18,7 @@ const useTimes = () => {
         const newTimes: Date[] = [];
         const time = new Date();
         time.setMinutes(0);
+        time.setHours(0);
         time.setSeconds(0);
         time.setMilliseconds(0);
         for (let i = 0; i < 24; i++) {
@@ -52,7 +54,7 @@ const Time: FC<{
             currentHour !== hour &&
             onHourChange(
                 zonedTimeToUtc(
-                    setHours(utcToZonedTime(new Date(), timeZone), hour),
+                    setHours(utcToZonedTime(getUtc(), timeZone), hour),
                     timeZone
                 ).getHours()
             ),
@@ -85,24 +87,20 @@ export const TimeScroller: FC<{
     onHourChange?: (hour: number) => unknown;
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
     const times = useTimes();
-    const [center, setCenter] = useState<number>(12);
+    const [pos, setPos] = useState([12, 0, 0]);
 
     useEffect(() => {
-        setCenter(
-            times.findIndex((time) => time.getHours() === inputCurrentHour)
+        const center = times.findIndex(
+            (time) => time.getHours() === inputCurrentHour
         );
-        return () => {
-            setCenter(12);
-        };
-    }, [inputCurrentHour, times, setCenter]);
+        setPos(() => [-(center * fontWidth), 0, 0]);
+    }, [inputCurrentHour, times]);
 
     const { position } = useSpring({
         config: config.default,
-        position: [-(center * fontWidth), 0, 0],
+        position: [...pos],
     });
-    if (timeZone === 'gmt') {
-        console.log('center.current', center);
-    }
+
     return (
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">

@@ -3,6 +3,7 @@ import { utcToZonedTime } from 'date-fns-tz';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
+import { getUtc } from '../_functions/get-utc';
 import { TimeScroller } from './time-scroller';
 
 const intlFormatToUse = {
@@ -10,19 +11,19 @@ const intlFormatToUse = {
     minute: 'numeric',
 } as const;
 
-const useCurrentTime = () => {
-    const [currentTime, setCurrentTime] = useState<Date | null>(new Date());
+const useCurrentUtcTime = () => {
+    const [currentTime, setCurrentTime] = useState<Date | null>(getUtc());
     const interval = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
         console.log('useCurrentTime');
-        setCurrentTime(new Date());
+        setCurrentTime(getUtc());
         interval.current = setInterval(() => {
-            setCurrentTime(new Date());
+            setCurrentTime(getUtc());
         }, 100000);
         return () => {
             interval.current && clearInterval(interval.current);
         };
-    }, []);
+    }, [setCurrentTime]);
     return currentTime;
 };
 
@@ -30,7 +31,7 @@ const useRelativeTimes = (timeZones: string[]) => {
     const [masterTime, setMasterTime] = useState<Date | null>(null);
     const relativeTimes = useRef<[[Date, string]] | null>(null);
 
-    const currentTime = useCurrentTime();
+    const currentTime = useCurrentUtcTime();
     const setFirstAndLast = useSetAtom(firstAndLastAtom);
 
     useEffect(() => {
@@ -44,7 +45,7 @@ const useRelativeTimes = (timeZones: string[]) => {
 
         const zonedTime = masterTime ?? currentTime;
 
-        const times: [[Date, string]] = [[zonedTime, 'gmt']];
+        const times: [[Date, string]] = [[zonedTime, 'utc']];
         for (const timeZone of timeZones) {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
