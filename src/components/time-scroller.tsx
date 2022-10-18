@@ -11,12 +11,12 @@ const intlFormatToUse = {
     minute: 'numeric',
 } as const;
 
-const useTimes = () => {
+const useTimes = (zone: string) => {
     const times = useRef<Date[]>([]);
 
     useEffect(() => {
         const newTimes: Date[] = [];
-        const time = new Date();
+        const time = getUtc();
         time.setMinutes(0);
         time.setHours(0);
         time.setSeconds(0);
@@ -30,7 +30,7 @@ const useTimes = () => {
         return () => {
             times.current = [];
         };
-    }, []);
+    }, [zone]);
 
     return times.current;
 };
@@ -61,6 +61,7 @@ const Time: FC<{
         [currentHour, hour, onHourChange, timeZone]
     );
 
+    console.log('render time', index);
     useCursor(hovered);
     return (
         <animated.mesh
@@ -86,22 +87,28 @@ export const TimeScroller: FC<{
     timeZone: string;
     onHourChange?: (hour: number) => unknown;
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
-    const times = useTimes();
+    const times = useTimes(timeZone);
+
     const [pos, setPos] = useState([12, 0, 0]);
-    const { position } = useSpring({
-        config: config.default,
-        position: [...pos],
-    });
+
+    if (timeZone === 'utc') {
+        console.log('inputCurrentHour a', inputCurrentHour);
+    }
 
     useEffect(() => {
         const center = times.findIndex(
             (time) => time.getHours() === inputCurrentHour
         );
+
         if (center !== -1) {
             setPos(() => [-(center * fontWidth), 0, 0]);
         }
     }, [inputCurrentHour, times]);
-
+    const { position } = useSpring({
+        config: config.default,
+        position: pos,
+    });
+    console.log('rendering time scroller');
     return (
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">

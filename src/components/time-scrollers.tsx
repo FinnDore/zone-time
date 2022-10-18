@@ -19,7 +19,7 @@ const useCurrentUtcTime = () => {
         setCurrentTime(getUtc());
         interval.current = setInterval(() => {
             setCurrentTime(getUtc());
-        }, 0);
+        }, 1000);
         return () => {
             interval.current && clearInterval(interval.current);
         };
@@ -29,66 +29,68 @@ const useCurrentUtcTime = () => {
 
 const useRelativeTimes = (timeZones: string[]) => {
     const [masterTime, setMasterTime] = useState<Date | null>(null);
-    const relativeTimes = useRef<[[Date, string]] | null>(null);
+    // const relativeTimes = useRef<[[Date, string]] | null>(null);
 
     const currentTime = useCurrentUtcTime();
     const setFirstAndLast = useSetAtom(firstAndLastAtom);
 
-    useEffect(() => {
-        const reset = () => {
-            // relativeTimes.current = null;
-            // setMasterTime(null);
-        };
-        if (!currentTime) {
-            return reset;
-        }
-
+    // useEffect(() => {
+    //     const reset = () => {
+    //         // relativeTimes.current = null;
+    //         // setMasterTime(null);
+    //     };
+    //     if (!currentTime) {
+    //         return reset;
+    //     }
+    let relativeTimes: [Date, string][] | null = null;
+    if (currentTime) {
         const zonedTime = masterTime ?? currentTime;
 
-        const times: [[Date, string]] = [[zonedTime, 'utc']];
+        const times: [Date, string][] = [];
         for (const timeZone of timeZones) {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
         }
 
-        const first = times[0][0];
+        const first = times[0]?.[0];
         const last = times[times.length - 1]?.[0];
         if (first && last) {
             setFirstAndLast({ first: first, last: last });
         }
 
-        relativeTimes.current = times;
+        relativeTimes = times;
 
-        return reset;
-    }, [currentTime, masterTime, setFirstAndLast, timeZones]);
-
+        // return reset;
+        // }, [currentTime, masterTime, setFirstAndLast, timeZones]);
+    }
     return {
-        relativeTimes: relativeTimes.current,
+        relativeTimes,
         setMasterTime,
     };
 };
 
 const TimeScrollers = () => {
     const { relativeTimes, setMasterTime } = useRelativeTimes([
+        'Europe/London',
         'PST',
         'EST',
         'CET',
         'IST',
     ]);
+
     const onHourChange = useCallback(
         (hour: number) => {
-            if (relativeTimes?.[0]) {
-                const [masterTime] = relativeTimes[0];
-                setMasterTime(() => setHours(masterTime, hour));
-            }
+            setMasterTime((masterTime) =>
+                setHours(masterTime ?? getUtc(), hour)
+            );
         },
-        [relativeTimes, setMasterTime]
+        [setMasterTime]
     );
 
     if (!relativeTimes) {
         return null;
     }
-
+    console.log('render TimeScrollers');
     return (
         <>
             {relativeTimes.map((time, index) => (
