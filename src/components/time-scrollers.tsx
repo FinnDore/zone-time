@@ -40,7 +40,7 @@ const useRelativeTimes = (timeZones: string[]) => {
         const first = times[0]?.[0];
         const last = times[times.length - 1]?.[0];
         if (first && last) {
-            setFirstAndLast({ first: first, last: last });
+            setFirstAndLast({ first, last });
         }
 
         relativeTimes = times;
