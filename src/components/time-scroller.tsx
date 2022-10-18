@@ -1,9 +1,10 @@
+/* eslint-disable react/display-name */
 import { animated, config, useSpring } from '@react-spring/three';
 import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
 import { intlFormat, setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { getUtc } from '../_functions/get-utc';
 
 const intlFormatToUse = {
@@ -36,51 +37,59 @@ const useTimes = (zone: string) => {
 };
 
 const fontWidth = 35;
-const Time: FC<{
-    time: Date;
-    timeZone: string;
-    currentHour: number;
-    onHourChange: ((hours: number) => unknown) | undefined;
-    index: number;
-}> = ({ time, currentHour, onHourChange, index, timeZone }) => {
-    const [hovered, setHovered] = useState(false);
+const Time = memo(
+    ({
+        time,
+        currentHour,
+        onHourChange,
+        index,
+        timeZone,
+    }: {
+        time: Date;
+        timeZone: string;
+        currentHour: number;
+        onHourChange: ((hours: number) => unknown) | undefined;
+        index: number;
+    }) => {
+        const [hovered, setHovered] = useState(false);
 
-    const hour = time.getHours();
-    const isCurrentHour = hour === currentHour;
+        const hour = time.getHours();
+        const isCurrentHour = hour === currentHour;
 
-    const onHourChangeFn = useCallback(
-        () =>
-            onHourChange &&
-            currentHour !== hour &&
-            onHourChange(
-                zonedTimeToUtc(
-                    setHours(utcToZonedTime(getUtc(), timeZone), hour),
-                    timeZone
-                ).getHours()
-            ),
-        [currentHour, hour, onHourChange, timeZone]
-    );
+        const onHourChangeFn = useCallback(
+            () =>
+                onHourChange &&
+                currentHour !== hour &&
+                onHourChange(
+                    zonedTimeToUtc(
+                        setHours(utcToZonedTime(getUtc(), timeZone), hour),
+                        timeZone
+                    ).getHours()
+                ),
+            [currentHour, hour, onHourChange, timeZone]
+        );
 
-    console.log('render time', index);
-    useCursor(hovered);
-    return (
-        <animated.mesh
-            position={[index * fontWidth, 0, 0]}
-            onPointerOver={() => setHovered(true)}
-            onPointerOut={() => setHovered(false)}
-            onClick={onHourChangeFn}
-        >
-            <Text
-                color={'#fff'}
-                fillOpacity={isCurrentHour ? 1 : 0.4}
-                fontSize={isCurrentHour ? 9 : 7}
-                font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
+        console.log('render time', index);
+        useCursor(hovered);
+        return (
+            <animated.mesh
+                position={[index * fontWidth, 0, 0]}
+                onPointerOver={() => setHovered(true)}
+                onPointerOut={() => setHovered(false)}
+                onClick={onHourChangeFn}
             >
-                {intlFormat(time, intlFormatToUse)}
-            </Text>
-        </animated.mesh>
-    );
-};
+                <Text
+                    color={'#fff'}
+                    fillOpacity={isCurrentHour ? 1 : 0.4}
+                    fontSize={isCurrentHour ? 9 : 7}
+                    font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
+                >
+                    {intlFormat(time, intlFormatToUse)}
+                </Text>
+            </animated.mesh>
+        );
+    }
+);
 
 export const TimeScroller: FC<{
     inputCurrentHour: number;
