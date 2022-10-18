@@ -54,6 +54,9 @@ const TimeScrollerFallback = () => (
         <Skeleton className="h-4 mx-4 my-6" />
         <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
         <Skeleton className="h-4 mx-4 my-6" />
+        <Skeleton className="h-4 mx-4 my-6" />
+        <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
+        <Skeleton className="h-4 mx-4 my-6" />
     </div>
 );
 

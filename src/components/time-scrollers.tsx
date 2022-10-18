@@ -6,16 +6,10 @@ import { firstAndLastAtom } from '../attoms/first-and-last';
 import { getUtc } from '../_functions/get-utc';
 import { TimeScroller } from './time-scroller';
 
-const intlFormatToUse = {
-    hour: 'numeric',
-    minute: 'numeric',
-} as const;
-
 const useCurrentUtcTime = () => {
     const [currentTime, setCurrentTime] = useState<Date | null>(getUtc());
     const interval = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
-        console.log('useCurrentTime');
         setCurrentTime(getUtc());
         interval.current = setInterval(() => {
             setCurrentTime(getUtc());
@@ -29,19 +23,10 @@ const useCurrentUtcTime = () => {
 
 const useRelativeTimes = (timeZones: string[]) => {
     const [masterTime, setMasterTime] = useState<Date | null>(null);
-    // const relativeTimes = useRef<[[Date, string]] | null>(null);
 
     const currentTime = useCurrentUtcTime();
     const setFirstAndLast = useSetAtom(firstAndLastAtom);
 
-    // useEffect(() => {
-    //     const reset = () => {
-    //         // relativeTimes.current = null;
-    //         // setMasterTime(null);
-    //     };
-    //     if (!currentTime) {
-    //         return reset;
-    //     }
     let relativeTimes: [Date, string][] | null = null;
     if (currentTime) {
         const zonedTime = masterTime ?? currentTime;
@@ -59,9 +44,6 @@ const useRelativeTimes = (timeZones: string[]) => {
         }
 
         relativeTimes = times;
-
-        // return reset;
-        // }, [currentTime, masterTime, setFirstAndLast, timeZones]);
     }
     return {
         relativeTimes,
@@ -90,7 +72,7 @@ const TimeScrollers = () => {
     if (!relativeTimes) {
         return null;
     }
-    console.log('render TimeScrollers');
+
     return (
         <>
             {relativeTimes.map((time, index) => (

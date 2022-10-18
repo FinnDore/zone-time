@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import { animated, config, useSpring } from '@react-spring/three';
 import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
@@ -37,59 +36,56 @@ const useTimes = (zone: string) => {
 };
 
 const fontWidth = 35;
-const Time = memo(
-    ({
-        time,
-        currentHour,
-        onHourChange,
-        index,
-        timeZone,
-    }: {
-        time: Date;
-        timeZone: string;
-        currentHour: number;
-        onHourChange: ((hours: number) => unknown) | undefined;
-        index: number;
-    }) => {
-        const [hovered, setHovered] = useState(false);
+const Time = memo(function TimeInner({
+    time,
+    currentHour,
+    onHourChange,
+    index,
+    timeZone,
+}: {
+    time: Date;
+    timeZone: string;
+    currentHour: number;
+    onHourChange: ((hours: number) => unknown) | undefined;
+    index: number;
+}) {
+    const [hovered, setHovered] = useState(false);
 
-        const hour = time.getHours();
-        const isCurrentHour = hour === currentHour;
+    const hour = time.getHours();
+    const isCurrentHour = hour === currentHour;
 
-        const onHourChangeFn = useCallback(
-            () =>
-                onHourChange &&
-                currentHour !== hour &&
-                onHourChange(
-                    zonedTimeToUtc(
-                        setHours(utcToZonedTime(getUtc(), timeZone), hour),
-                        timeZone
-                    ).getHours()
-                ),
-            [currentHour, hour, onHourChange, timeZone]
-        );
+    const onHourChangeFn = useCallback(
+        () =>
+            onHourChange &&
+            currentHour !== hour &&
+            onHourChange(
+                zonedTimeToUtc(
+                    setHours(utcToZonedTime(getUtc(), timeZone), hour),
+                    timeZone
+                ).getHours()
+            ),
+        [currentHour, hour, onHourChange, timeZone]
+    );
 
-        console.log('render time', index);
-        useCursor(hovered);
-        return (
-            <animated.mesh
-                position={[index * fontWidth, 0, 0]}
-                onPointerOver={() => setHovered(true)}
-                onPointerOut={() => setHovered(false)}
-                onClick={onHourChangeFn}
+    useCursor(hovered);
+    return (
+        <animated.mesh
+            position={[index * fontWidth, 0, 0]}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+            onClick={onHourChangeFn}
+        >
+            <Text
+                color={'#fff'}
+                fillOpacity={isCurrentHour ? 1 : 0.4}
+                fontSize={isCurrentHour ? 9 : 7}
+                font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
             >
-                <Text
-                    color={'#fff'}
-                    fillOpacity={isCurrentHour ? 1 : 0.4}
-                    fontSize={isCurrentHour ? 9 : 7}
-                    font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
-                >
-                    {intlFormat(time, intlFormatToUse)}
-                </Text>
-            </animated.mesh>
-        );
-    }
-);
+                {intlFormat(time, intlFormatToUse)}
+            </Text>
+        </animated.mesh>
+    );
+});
 
 export const TimeScroller: FC<{
     inputCurrentHour: number;
@@ -98,26 +94,19 @@ export const TimeScroller: FC<{
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
     const times = useTimes(timeZone);
 
-    const [pos, setPos] = useState([12, 0, 0]);
-
     if (timeZone === 'utc') {
         console.log('inputCurrentHour a', inputCurrentHour);
     }
 
-    useEffect(() => {
-        const center = times.findIndex(
-            (time) => time.getHours() === inputCurrentHour
-        );
+    const center = times.findIndex(
+        (time) => time.getHours() === inputCurrentHour
+    );
 
-        if (center !== -1) {
-            setPos(() => [-(center * fontWidth), 0, 0]);
-        }
-    }, [inputCurrentHour, times]);
     const { position } = useSpring({
         config: config.default,
-        position: pos,
+        position: center !== -1 ? [-(center * fontWidth), 0, 0] : [12, 0, 0],
     });
-    console.log('rendering time scroller');
+
     return (
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">
