@@ -83,6 +83,12 @@ const TimeAwareBgs = () => {
 const Home: NextPage = () => {
     return (
         <>
+            <div className="hidden absolute md:flex top-4 left-6">
+                <picture className="my-auto mr-2 w-6">
+                    <img src="/time.png" alt="logo for time" />
+                </picture>
+                <h1 className="font-2xl">Time</h1>
+            </div>
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
                     <Suspense fallback={<TimeScrollerFallback />}>
