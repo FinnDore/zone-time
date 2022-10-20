@@ -54,10 +54,7 @@ const useRelativeTimes = (timeZones: string[]) => {
 const TimeScrollers = () => {
     const { relativeTimes, setMasterTime } = useRelativeTimes([
         'Europe/London',
-        'PST',
-        'EST',
-        'CET',
-        'IST',
+        'Pacific/Tahiti',
     ]);
 
     const onHourChange = useCallback(

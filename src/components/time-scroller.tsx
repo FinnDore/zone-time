@@ -91,10 +91,6 @@ export const TimeScroller: FC<{
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
     const times = useTimes(timeZone);
 
-    if (timeZone === 'utc') {
-        console.log('inputCurrentHour a', inputCurrentHour);
-    }
-
     const center = times.findIndex(
         (time) => time.getHours() === inputCurrentHour
     );
