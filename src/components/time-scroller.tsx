@@ -1,15 +1,12 @@
 import { animated, config, useSpring } from '@react-spring/three';
 import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
-import { intlFormat, setHours } from 'date-fns';
+import { format, setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { FC, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { getUtc } from '../_functions/get-utc';
 
-const intlFormatToUse = {
-    hour: 'numeric',
-    minute: 'numeric',
-} as const;
+const timeFormat = 'kk:mm';
 
 const useTimes = (zone: string) => {
     const times = useRef<Date[]>([]);
@@ -81,7 +78,7 @@ const Time = memo(function TimeInner({
                 fontSize={isCurrentHour ? 9 : 7}
                 font={'/IBMPlexMono/IBMPlexMono-Regular.ttf'}
             >
-                {intlFormat(time, intlFormatToUse)}
+                {format(time, timeFormat)}
             </Text>
         </animated.mesh>
     );
