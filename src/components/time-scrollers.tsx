@@ -13,7 +13,7 @@ const useCurrentUtcTime = () => {
         setCurrentTime(getUtc());
         interval.current = setInterval(() => {
             setCurrentTime(getUtc());
-        }, 1000);
+        }, 10000);
         return () => {
             interval.current && clearInterval(interval.current);
         };
@@ -36,26 +36,25 @@ const useRelativeTimes = (timeZones: string[]) => {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
         }
+        relativeTimes = times;
+    }
 
-        const first = times[0]?.[0];
-        const last = times[times.length - 1]?.[0];
+    useEffect(() => {
+        const first = relativeTimes?.[0]?.[0];
+        const last = relativeTimes?.[relativeTimes.length - 1]?.[0];
         if (first && last) {
             setFirstAndLast({ first, last });
         }
+    }, [relativeTimes, setFirstAndLast]);
 
-        relativeTimes = times;
-    }
     return {
         relativeTimes,
         setMasterTime,
     };
 };
 
-const TimeScrollers = () => {
-    const { relativeTimes, setMasterTime } = useRelativeTimes([
-        'Europe/London',
-        'Pacific/Tahiti',
-    ]);
+const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
+    const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);
 
     const onHourChange = useCallback(
         (hour: number) => {
@@ -69,11 +68,11 @@ const TimeScrollers = () => {
     if (!relativeTimes) {
         return null;
     }
-
+    console.log(relativeTimes);
     return (
         <>
             {relativeTimes.map((time, index) => (
-                <div key={time[1]}>
+                <div key={index}>
                     <div className="my-6">
                         <TimeScroller
                             timeZone={time[1]}

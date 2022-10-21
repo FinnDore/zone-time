@@ -1,9 +1,10 @@
 import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
 import type { NextPage } from 'next';
-import { forwardRef, HTMLProps, lazy, Suspense } from 'react';
+import { forwardRef, HTMLProps, lazy, Suspense, useState } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
 import { Skeleton } from '../components/skeleton';
+import { TimeInput } from '../components/time-input';
 
 const TimeAwareBg = forwardRef<
     HTMLDivElement,
@@ -54,15 +55,11 @@ const TimeScrollerFallback = () => (
         <Skeleton className="h-4 mx-4 my-6" />
         <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
         <Skeleton className="h-4 mx-4 my-6" />
-        <Skeleton className="h-4 mx-4 my-6" />
-        <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
-        <Skeleton className="h-4 mx-4 my-6" />
     </div>
 );
 
 const TimeAwareBgs = () => {
     const firstAndLast = useAtomValue(firstAndLastAtom);
-
     if (!firstAndLast) {
         return null;
     }
@@ -81,6 +78,19 @@ const TimeAwareBgs = () => {
 };
 
 const Home: NextPage = () => {
+    const [timeZones, setTimeZones] = useState<string[]>([
+        'Europe/London',
+        'America/los_angeles',
+    ]);
+
+    const onTimeZoneChange = (index: number) => (timeZone: string) => {
+        setTimeZones((timeZones) => {
+            const newTimeZones = [...timeZones];
+            newTimeZones[index] = timeZone;
+            return newTimeZones;
+        });
+    };
+
     return (
         <>
             <div className="hidden absolute md:flex top-4 left-6">
@@ -91,9 +101,22 @@ const Home: NextPage = () => {
             </div>
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
+                    <div className="flex justify-center mb-4">
+                        <TimeInput
+                            defaultVal={'london'}
+                            onChange={onTimeZoneChange(0)}
+                        />
+                    </div>
                     <Suspense fallback={<TimeScrollerFallback />}>
-                        <TimeScrollers />
+                        <TimeScrollers timeZones={timeZones} />
                     </Suspense>
+
+                    <div className="flex justify-center mt-4">
+                        <TimeInput
+                            defaultVal={'Los angeles'}
+                            onChange={onTimeZoneChange(1)}
+                        />
+                    </div>
 
                     <TimeAwareBgs />
                 </div>

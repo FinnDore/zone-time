@@ -104,9 +104,9 @@ export const TimeScroller: FC<{
         <div className="w-full h-4">
             <Canvas className="w-full h-4 absolute">
                 <animated.mesh position={position as unknown as Vector3}>
-                    {times.map((x, i) => (
+                    {times.map((x) => (
                         <Time
-                            index={i}
+                            index={x.getHours()}
                             timeZone={timeZone}
                             currentHour={inputCurrentHour}
                             time={x}
