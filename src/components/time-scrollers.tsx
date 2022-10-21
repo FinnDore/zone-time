@@ -13,7 +13,7 @@ const useCurrentUtcTime = () => {
         setCurrentTime(getUtc());
         interval.current = setInterval(() => {
             setCurrentTime(getUtc());
-        }, 1000);
+        }, 10000);
         return () => {
             interval.current && clearInterval(interval.current);
         };
@@ -36,15 +36,16 @@ const useRelativeTimes = (timeZones: string[]) => {
             const time = utcToZonedTime(zonedTime, timeZone);
             times.push([time, timeZone]);
         }
-
-        const first = times[0]?.[0];
-        const last = times[times.length - 1]?.[0];
+        relativeTimes = times;
+    }
+    useEffect(() => {
+        const first = relativeTimes?.[0]?.[0];
+        const last = relativeTimes?.[relativeTimes.length - 1]?.[0];
         if (first && last) {
             setFirstAndLast({ first, last });
         }
+    }, [relativeTimes, setFirstAndLast]);
 
-        relativeTimes = times;
-    }
     return {
         relativeTimes,
         setMasterTime,
@@ -66,7 +67,7 @@ const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
     if (!relativeTimes) {
         return null;
     }
-
+    console.log(relativeTimes);
     return (
         <>
             {relativeTimes.map((time, index) => (

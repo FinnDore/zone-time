@@ -63,7 +63,6 @@ const TimeScrollerFallback = () => (
 
 const TimeAwareBgs = () => {
     const firstAndLast = useAtomValue(firstAndLastAtom);
-
     if (!firstAndLast) {
         return null;
     }
@@ -118,7 +117,7 @@ const Home: NextPage = () => {
                     <div className="flex justify-center mt-4">
                         <TimeInput
                             defaultVal={'Los angeles'}
-                            onChange={onTimeZoneChange(0)}
+                            onChange={onTimeZoneChange(1)}
                         />
                     </div>
 
