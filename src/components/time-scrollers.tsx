@@ -51,11 +51,8 @@ const useRelativeTimes = (timeZones: string[]) => {
     };
 };
 
-const TimeScrollers = () => {
-    const { relativeTimes, setMasterTime } = useRelativeTimes([
-        'Europe/London',
-        'Pacific/Tahiti',
-    ]);
+const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
+    const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);
 
     const onHourChange = useCallback(
         (hour: number) => {
@@ -73,7 +70,7 @@ const TimeScrollers = () => {
     return (
         <>
             {relativeTimes.map((time, index) => (
-                <div key={time[1]}>
+                <div key={index}>
                     <div className="my-6">
                         <TimeScroller
                             timeZone={time[1]}
