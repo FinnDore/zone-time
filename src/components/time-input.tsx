@@ -24,7 +24,7 @@ export const TimeInput = ({
             ? prettyZones ?? []
             : prettyZones
                   ?.filter((x) => !!scores[x])
-                  .sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0)) ?? [];
+                  .sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0));
 
     return (
         <form className="relative w-min" autoComplete="off">
@@ -45,7 +45,7 @@ export const TimeInput = ({
                     className="bg-transparent text-center text-3xl"
                     onChange={(event) => setQuery(event.target.value)}
                 />
-                <Combobox.Options className="absolute max-h-32 overflow-y-auto bg-black border-[#C9C9C9]/30 border z-50 w-full">
+                <Combobox.Options className="max-h-32 overflow-y-auto bg-black border-[#C9C9C9]/30 border z-50 w-full">
                     {filteredZones.map((zone) => (
                         <Combobox.Option key={zone} value={zone}>
                             {({ active }) => (

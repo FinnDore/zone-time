@@ -38,6 +38,7 @@ const useRelativeTimes = (timeZones: string[]) => {
         }
         relativeTimes = times;
     }
+
     useEffect(() => {
         const first = relativeTimes?.[0]?.[0];
         const last = relativeTimes?.[relativeTimes.length - 1]?.[0];
