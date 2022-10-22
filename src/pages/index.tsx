@@ -13,7 +13,8 @@ import {
 } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
 import { Skeleton } from '../components/skeleton';
-import { useCurrentUtcTime } from '../hooks/current-time';
+import { useCurrentTime } from '../hooks/current-time';
+import { useRelativeTimes } from '../hooks/use-relative-times';
 
 const TimeAwareBg = forwardRef<
     HTMLDivElement,
@@ -61,9 +62,10 @@ const TimeAwareBg = forwardRef<
 const TimeScrollers = lazy(() => import('../components/time-scrollers'));
 const TimeScrollerFallback = () => (
     <div className="flex flex-col w-full">
-        <Skeleton className="h-4 mx-4 my-6" />
-        <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
-        <Skeleton className="h-4 mx-4 my-6" />
+        <Skeleton className="h-4 mx-4 my-4" />
+        <Skeleton className="h-4 mx-4 my-4" />
+        <Skeleton className="h-4 mx-4 my-4" />
+        <Skeleton className="h-4 mx-4 my-4" />
     </div>
 );
 
@@ -87,7 +89,7 @@ const TimeAwareBgs = () => {
 };
 
 const Header = () => {
-    const currentTime = useCurrentUtcTime();
+    const currentTime = useCurrentTime();
     const timeZone = useRef<string | null>(null);
 
     useEffect(() => {
@@ -122,13 +124,10 @@ const Home: NextPage = () => {
         'Asia/Tokyo',
         'Pacific/Tahiti',
     ];
-
+    const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);
     return (
         <>
             <div className="hidden absolute md:flex top-4 left-6">
-                <picture className="my-auto mr-2 w-6">
-                    <img src="/time.png" alt="logo for time" />
-                </picture>
                 <h1 className="font-2xl">Time</h1>
             </div>
             <div className="h-screen grid place-items-center">
@@ -136,8 +135,14 @@ const Home: NextPage = () => {
                     <div className="flex justify-center mb-6 -mt-6">
                         <Header />
                     </div>
+
                     <Suspense fallback={<TimeScrollerFallback />}>
-                        <TimeScrollers timeZones={timeZones} />
+                        {relativeTimes && (
+                            <TimeScrollers
+                                times={relativeTimes}
+                                setMasterTime={setMasterTime}
+                            />
+                        )}
                     </Suspense>
 
                     <TimeAwareBgs />
