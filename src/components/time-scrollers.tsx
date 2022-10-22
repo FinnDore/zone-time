@@ -74,7 +74,7 @@ const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
         <>
             {relativeTimes.map((time, index) => (
                 <div key={index}>
-                    <div className="my-1 relative">
+                    <div className="my-2 relative">
                         <TimeScroller
                             timeZone={time[1]}
                             onHourChange={onHourChange}
@@ -82,7 +82,7 @@ const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
                         />
                         <div className="ml-4 mt-2 text-xs opacity-50 italic">
                             {formatTimezone(time[1])}{' '}
-                            {formatTz(time[0], 'xxx', { timeZone: time[1] })}
+                            {formatTz(time[0], 'OOO', { timeZone: time[1] })}
                         </div>
                     </div>
                 </div>
