@@ -1,8 +1,9 @@
 import { setHours } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { format as formatTz, utcToZonedTime } from 'date-fns-tz';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
+import { formatTimezone } from '../_functions/format-time-zone';
 import { getUtc } from '../_functions/get-utc';
 import { TimeScroller } from './time-scroller';
 
@@ -68,21 +69,22 @@ const TimeScrollers = ({ timeZones }: { timeZones: string[] }) => {
     if (!relativeTimes) {
         return null;
     }
-    console.log(relativeTimes);
+
     return (
         <>
             {relativeTimes.map((time, index) => (
                 <div key={index}>
-                    <div className="my-6">
+                    <div className="my-1 relative">
                         <TimeScroller
                             timeZone={time[1]}
                             onHourChange={onHourChange}
                             inputCurrentHour={time[0].getHours()}
                         />
+                        <div className="ml-4 mt-2 text-xs opacity-50 italic">
+                            {formatTimezone(time[1])}{' '}
+                            {formatTz(time[0], 'xxx', { timeZone: time[1] })}
+                        </div>
                     </div>
-                    {index !== relativeTimes.length - 1 && (
-                        <div className="border-t-[#C9C9C9]/30 w-[80%] border-t mx-auto"></div>
-                    )}
                 </div>
             ))}
         </>

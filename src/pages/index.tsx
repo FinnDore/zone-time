@@ -1,10 +1,19 @@
 import clsx from 'clsx';
+import { format } from 'date-fns';
 import { useAtomValue } from 'jotai';
+import { capitalize } from 'lodash';
 import type { NextPage } from 'next';
-import { forwardRef, HTMLProps, lazy, Suspense, useState } from 'react';
+import {
+    forwardRef,
+    HTMLProps,
+    lazy,
+    Suspense,
+    useEffect,
+    useRef,
+} from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
 import { Skeleton } from '../components/skeleton';
-import { TimeInput } from '../components/time-input';
+import { useCurrentUtcTime } from '../hooks/current-time';
 
 const TimeAwareBg = forwardRef<
     HTMLDivElement,
@@ -77,19 +86,42 @@ const TimeAwareBgs = () => {
     );
 };
 
+const Header = () => {
+    const currentTime = useCurrentUtcTime();
+    const timeZone = useRef<string | null>(null);
+
+    useEffect(() => {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        timeZone.current = capitalize(
+            zone.replace(/_/g, ' ').split('/').pop() ?? ''
+        );
+    }, []);
+
+    return (
+        <div className="flex flex-col items-center justify-center">
+            <div className="text-sm font-bold text-center">
+                <div className="opacity-50">
+                    {timeZone.current}
+                    {` `}
+                    {currentTime && format(currentTime, 'co LLL')}
+                </div>
+                <div className="text-4xl">
+                    {currentTime && format(currentTime, 'HH:mm:ss')}
+                </div>
+
+                <div className="opacity-50"></div>
+            </div>
+        </div>
+    );
+};
+
 const Home: NextPage = () => {
-    const [timeZones, setTimeZones] = useState<string[]>([
+    const timeZones = [
         'Europe/London',
         'America/los_angeles',
-    ]);
-
-    const onTimeZoneChange = (index: number) => (timeZone: string) => {
-        setTimeZones((timeZones) => {
-            const newTimeZones = [...timeZones];
-            newTimeZones[index] = timeZone;
-            return newTimeZones;
-        });
-    };
+        'Asia/Tokyo',
+        'Pacific/Tahiti',
+    ];
 
     return (
         <>
@@ -101,22 +133,12 @@ const Home: NextPage = () => {
             </div>
             <div className="h-screen grid place-items-center">
                 <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
-                    <div className="flex justify-center mb-4">
-                        <TimeInput
-                            defaultVal={'london'}
-                            onChange={onTimeZoneChange(0)}
-                        />
+                    <div className="flex justify-center mb-6 -mt-6">
+                        <Header />
                     </div>
                     <Suspense fallback={<TimeScrollerFallback />}>
                         <TimeScrollers timeZones={timeZones} />
                     </Suspense>
-
-                    <div className="flex justify-center mt-4">
-                        <TimeInput
-                            defaultVal={'Los angeles'}
-                            onChange={onTimeZoneChange(1)}
-                        />
-                    </div>
 
                     <TimeAwareBgs />
                 </div>
