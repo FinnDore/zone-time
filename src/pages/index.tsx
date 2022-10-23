@@ -1,3 +1,11 @@
+import { PlusIcon } from '@radix-ui/react-icons';
+import {
+    Anchor,
+    Content,
+    Popover,
+    Portal,
+    Trigger,
+} from '@radix-ui/react-popover';
 import { animated, useSpring } from '@react-spring/web';
 import clsx from 'clsx';
 import { format } from 'date-fns';
@@ -136,10 +144,6 @@ const Home: NextPage = () => {
         <>
             <div className="hidden absolute md:flex top-4 left-6">
                 <h1 className="font-2xl">Time</h1>
-                <TimeInput
-                    defaultVal="Europe/London"
-                    onChange={(val) => setTimezones((x) => [...x, val])}
-                />
             </div>
             <div className="h-screen grid place-items-center">
                 <animated.div
@@ -158,7 +162,27 @@ const Home: NextPage = () => {
                             />
                         )}
                     </Suspense>
-
+                    <div className="flex justify-end -mt-5 opacity-50">
+                        <Popover>
+                            <Anchor />
+                            <Trigger
+                                className="hover:bg-white/50 rounded-sm transition-colors px-3 py-1 mr-1"
+                                role="Add a timezone"
+                            >
+                                <PlusIcon />
+                            </Trigger>
+                            <Portal>
+                                <Content className="bg-black  border-[#C9C9C9]/30  border rounded-md ">
+                                    <TimeInput
+                                        defaultVal="Europe/London"
+                                        onChange={(val) =>
+                                            setTimezones((x) => [...x, val])
+                                        }
+                                    />
+                                </Content>
+                            </Portal>
+                        </Popover>
+                    </div>
                     <TimeAwareBgs />
                 </animated.div>
             </div>

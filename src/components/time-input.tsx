@@ -46,7 +46,7 @@ export const TimeInput = ({
                 }}
             >
                 <Combobox.Input
-                    className="bg-transparent text-center text-3xl"
+                    className="bg-transparent text-center text-1xl py-4"
                     onChange={(event) => setQuery(event.target.value)}
                 />
                 <Combobox.Options className="max-h-32 overflow-y-auto bg-black border-[#C9C9C9]/30 border z-50 w-full">
