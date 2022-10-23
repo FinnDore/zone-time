@@ -27,7 +27,11 @@ export const TimeInput = ({
                   .sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0)) ?? [];
 
     return (
-        <form className="relative w-min" autoComplete="off">
+        <form
+            className="relative w-min"
+            autoComplete="off"
+            onSubmit={(e) => e.preventDefault()}
+        >
             <Combobox
                 value={selectedZone}
                 onChange={(zone) => {

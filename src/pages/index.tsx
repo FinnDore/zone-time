@@ -1,3 +1,4 @@
+import { animated, useSpring } from '@react-spring/web';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useAtomValue } from 'jotai';
@@ -10,9 +11,11 @@ import {
     Suspense,
     useEffect,
     useRef,
+    useState,
 } from 'react';
 import { firstAndLastAtom } from '../attoms/first-and-last';
 import { Skeleton } from '../components/skeleton';
+import { TimeInput } from '../components/time-input';
 import { useCurrentTime } from '../hooks/current-time';
 import { useRelativeTimes } from '../hooks/use-relative-times';
 
@@ -118,20 +121,31 @@ const Header = () => {
 };
 
 const Home: NextPage = () => {
-    const timeZones = [
+    const [timeZones, setTimezones] = useState([
         'Europe/London',
         'America/los_angeles',
         'Asia/Tokyo',
         'Pacific/Tahiti',
-    ];
+    ]);
+
     const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);
+    const spring = useSpring({
+        height: timeZones.length * 3 + 16 + 'rem',
+    });
     return (
         <>
             <div className="hidden absolute md:flex top-4 left-6">
                 <h1 className="font-2xl">Time</h1>
+                <TimeInput
+                    defaultVal="Europe/London"
+                    onChange={(val) => setTimezones((x) => [...x, val])}
+                />
             </div>
             <div className="h-screen grid place-items-center">
-                <div className="big-shadow w-[90%] h-[90%] relative overflow-hidden md:w-[600px] md:h-[400px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center">
+                <animated.div
+                    style={spring}
+                    className="big-shadow w-[90%] relative overflow-hidden md:w-[600px] border bg-[#000]/60 border-[#C9C9C9]/30 rounded-3xl shadow-2xl flex flex-col justify-center"
+                >
                     <div className="flex justify-center mb-6 -mt-6">
                         <Header />
                     </div>
@@ -146,7 +160,7 @@ const Home: NextPage = () => {
                     </Suspense>
 
                     <TimeAwareBgs />
-                </div>
+                </animated.div>
             </div>
         </>
     );

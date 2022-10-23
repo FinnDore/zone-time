@@ -3,31 +3,25 @@ import { Text, useCursor } from '@react-three/drei';
 import { Canvas, Vector3 } from '@react-three/fiber';
 import { format, setHours } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { FC, memo, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, memo, useCallback, useRef, useState } from 'react';
 import { getUtc } from '../_functions/get-utc';
 
 const timeFormat = 'kk:mm';
 
-const useTimes = (zone: string) => {
+const useTimes = () => {
     const times = useRef<Date[]>([]);
 
-    useEffect(() => {
-        const newTimes: Date[] = [];
-        const time = getUtc();
-        time.setMinutes(0);
-        time.setHours(0);
-        time.setSeconds(0);
-        time.setMilliseconds(0);
-        for (let i = 0; i < 24; i++) {
-            newTimes.push(setHours(time, i));
-        }
+    const newTimes: Date[] = [];
+    const time = getUtc();
+    time.setMinutes(0);
+    time.setHours(0);
+    time.setSeconds(0);
+    time.setMilliseconds(0);
+    for (let i = 0; i < 24; i++) {
+        newTimes.push(setHours(time, i));
+    }
 
-        times.current = newTimes;
-
-        return () => {
-            times.current = [];
-        };
-    }, [zone]);
+    times.current = newTimes;
 
     return times.current;
 };
@@ -89,13 +83,14 @@ export const TimeScroller: FC<{
     timeZone: string;
     onHourChange?: (hour: number) => unknown;
 }> = ({ inputCurrentHour, onHourChange, timeZone }) => {
-    const times = useTimes(timeZone);
+    const times = useTimes();
 
     const center = times.findIndex(
         (time) => time.getHours() === inputCurrentHour
     );
 
     const { position } = useSpring({
+        from: { position: [0, 0, 0] },
         config: config.default,
         position: center !== -1 ? [-(center * fontWidth), 0, 0] : [12, 0, 0],
     });
