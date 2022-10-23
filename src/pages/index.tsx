@@ -6,7 +6,7 @@ import {
     Portal,
     Trigger,
 } from '@radix-ui/react-popover';
-import { animated, useSpring } from '@react-spring/web';
+import { animated, config, useSpring } from '@react-spring/web';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useAtomValue } from 'jotai';
@@ -139,6 +139,7 @@ const Home: NextPage = () => {
     const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);
     const spring = useSpring({
         height: timeZones.length * 3 + 16 + 'rem',
+        config: config.wobbly,
     });
     return (
         <>
@@ -161,28 +162,29 @@ const Home: NextPage = () => {
                                 setMasterTime={setMasterTime}
                             />
                         )}
+
+                        <div className="flex justify-end -mt-5 opacity-50">
+                            <Popover>
+                                <Anchor />
+                                <Trigger
+                                    className="hover:bg-white/50 rounded-sm transition-colors px-3 py-1 mr-1"
+                                    role="Add a timezone"
+                                >
+                                    <PlusIcon />
+                                </Trigger>
+                                <Portal>
+                                    <Content className="bg-black  border-[#C9C9C9]/30  border rounded-md ">
+                                        <TimeInput
+                                            defaultVal="London"
+                                            onChange={(val) =>
+                                                setTimezones((x) => [...x, val])
+                                            }
+                                        />
+                                    </Content>
+                                </Portal>
+                            </Popover>
+                        </div>
                     </Suspense>
-                    <div className="flex justify-end -mt-5 opacity-50">
-                        <Popover>
-                            <Anchor />
-                            <Trigger
-                                className="hover:bg-white/50 rounded-sm transition-colors px-3 py-1 mr-1"
-                                role="Add a timezone"
-                            >
-                                <PlusIcon />
-                            </Trigger>
-                            <Portal>
-                                <Content className="bg-black  border-[#C9C9C9]/30  border rounded-md ">
-                                    <TimeInput
-                                        defaultVal="Europe/London"
-                                        onChange={(val) =>
-                                            setTimezones((x) => [...x, val])
-                                        }
-                                    />
-                                </Content>
-                            </Portal>
-                        </Popover>
-                    </div>
                     <TimeAwareBgs />
                 </animated.div>
             </div>
