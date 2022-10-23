@@ -162,28 +162,32 @@ const Home: NextPage = () => {
                                 setMasterTime={setMasterTime}
                             />
                         )}
-
-                        <div className="flex justify-end -mt-5 opacity-50">
-                            <Popover>
-                                <Anchor />
-                                <Trigger
-                                    className="hover:bg-white/50 rounded-sm transition-colors px-3 py-1 mr-1"
-                                    role="Add a timezone"
-                                >
-                                    <PlusIcon />
-                                </Trigger>
-                                <Portal>
-                                    <Content className="bg-black  border-[#C9C9C9]/30  border rounded-md ">
-                                        <TimeInput
-                                            defaultVal="London"
-                                            onChange={(val) =>
-                                                setTimezones((x) => [...x, val])
-                                            }
-                                        />
-                                    </Content>
-                                </Portal>
-                            </Popover>
-                        </div>
+                        {timeZones.length < 14 && (
+                            <div className="flex justify-end -mt-5 opacity-50">
+                                <Popover>
+                                    <Anchor />
+                                    <Trigger
+                                        className="hover:bg-white/50 rounded-sm transition-colors px-3 py-1 mr-1"
+                                        role="Add a timezone"
+                                    >
+                                        <PlusIcon />
+                                    </Trigger>
+                                    <Portal>
+                                        <Content className="bg-black  border-[#C9C9C9]/30  border rounded-md ">
+                                            <TimeInput
+                                                defaultVal="London"
+                                                onChange={(val) =>
+                                                    setTimezones((x) => [
+                                                        ...x,
+                                                        val,
+                                                    ])
+                                                }
+                                            />
+                                        </Content>
+                                    </Portal>
+                                </Popover>
+                            </div>
+                        )}
                     </Suspense>
                     <TimeAwareBgs />
                 </animated.div>
