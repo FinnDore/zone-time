@@ -131,9 +131,9 @@ const Header = () => {
 const Home: NextPage = () => {
     const [timeZones, setTimezones] = useState([
         'Europe/London',
+        'Asia/Colombo',
         'America/los_angeles',
         'Asia/Tokyo',
-        'Pacific/Tahiti',
     ]);
 
     const { relativeTimes, setMasterTime } = useRelativeTimes(timeZones);

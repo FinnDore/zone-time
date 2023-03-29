@@ -35,7 +35,7 @@ const TimeScrollers = ({
                             onHourChange={onHourChange}
                             inputCurrentHour={time[0].getHours()}
                         />
-                        <div className="ml-4 mt-2 text-xs opacity-50 italic">
+                        <div className="ml-4 mt-2 text-xs opacity-50">
                             {formatTimezone(time[1])}{' '}
                             {formatTz(time[0], 'OOO', { timeZone: time[1] })}
                         </div>
