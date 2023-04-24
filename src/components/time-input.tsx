@@ -1,8 +1,8 @@
 import { Combobox } from '@headlessui/react';
 import clsx from 'clsx';
 import { useState } from 'react';
-import { useTimeZones } from '../hooks/time-zones';
 import { commandScore } from '../_functions/command-score';
+import { useTimeZones } from '../hooks/time-zones';
 
 export const TimeInput = ({
     defaultVal,

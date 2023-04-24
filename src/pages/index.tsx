@@ -13,10 +13,10 @@ import { useAtomValue } from 'jotai';
 import { capitalize } from 'lodash';
 import type { NextPage } from 'next';
 import {
-    forwardRef,
     HTMLProps,
-    lazy,
     Suspense,
+    forwardRef,
+    lazy,
     useEffect,
     useRef,
     useState,
@@ -132,6 +132,7 @@ const Home: NextPage = () => {
     const [timeZones, setTimezones] = useState([
         'Europe/London',
         'Asia/Colombo',
+        'Europe/Warsaw',
         'America/los_angeles',
         'Asia/Tokyo',
     ]);
